@@ -24,37 +24,24 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-
-
-app.get('/api', function (req, res) {
-  const date = new Date();
-  
-  // Return the current date in the required format
+app.get("/api", (req, res) => {
   res.json({
-    unix: date.getTime(),
-    utc: date.toUTCString()
+    unix: new Date().getTime(),
+    utc: new Date().toUTCString()
   });
 });
 
-app.get('/api/:date_string', function (req, res) {
-  const dateString = req.params.date_string;
-  let date;
+const isInvalidDate = (date) => date.toUTCString() === "Invalid Date"
+app.get("/api/:date?", (req, res) => {
+  let date = new Date(req.params.date)
 
-  // Check if it's a pure number (Unix timestamp)
-  if (!isNaN(dateString)) {
-    // If length is 13 digits, treat as milliseconds
-    const timestamp = parseInt(dateString);
-    date = new Date(timestamp);
-  } else {
-    // Otherwise, treat it as a regular date string
-    date = new Date(dateString);
+if(isInvalidDate(date)){
+  date = new Date(+req.params.date)
+}
+  if(isInvalidDate(date)){
+    res.json({error: "Invalid Date"})
+    return;
   }
-
-  // Check if the date is valid
-  if (date.toString() === "Invalid Date") {
-    return res.json({ error: "Invalid Date" });
-  }
-
   res.json({
     unix: date.getTime(),
     utc: date.toUTCString()

@@ -40,21 +40,21 @@ app.get('/api/:date_string', function (req, res) {
   const dateString = req.params.date_string;
   let date;
 
-  // Check if the date string is a valid ISO format
-  if (!isNaN(Date.parse(dateString))) {
-    date = new Date(dateString);
+  // Check if it's a pure number (Unix timestamp)
+  if (!isNaN(dateString)) {
+    // If length is 13 digits, treat as milliseconds
+    const timestamp = parseInt(dateString);
+    date = new Date(timestamp);
   } else {
-    console.log('Not a valid ISO date format:', dateString);
-    // If not, try to parse it as a Unix timestamp
-    const timestamp = parseInt(dateString, 10);
-    if (!isNaN(timestamp)) {
-      date = new Date(timestamp);
-    } else {
-      return res.json({ error: 'Invalid Date' });
-    }
+    // Otherwise, treat it as a regular date string
+    date = new Date(dateString);
   }
 
-  // Return the date in the required format
+  // Check if the date is valid
+  if (date.toString() === "Invalid Date") {
+    return res.json({ error: "Invalid Date" });
+  }
+
   res.json({
     unix: date.getTime(),
     utc: date.toUTCString()
